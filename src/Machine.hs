@@ -1,7 +1,7 @@
 module Machine where
 
-import Prelude hiding (lookup)
-import Data.Map as Map hiding (null)
+import           Data.Map as Map hiding (null)
+import           Prelude  hiding (Left, lookup)
 --import qualified Data.Map.Strict as Map
 
 -- a = Map.fromList [(1, 10), (2, 20)]
@@ -15,23 +15,27 @@ emptyState = "0"
 
 type Symbol = Char
 
+anySymbol :: Symbol
+anySymbol = '*'
+
 emptySymbol :: Symbol
 emptySymbol = ' '
 
-data Automaton = Automaton { state :: State
+data Automaton = Automaton { state      :: State
                            , tapeBefore :: [Symbol]
                            , headSymbol :: Symbol
-                           , tapeAfter :: [Symbol]
+                           , tapeAfter  :: [Symbol]
                            } deriving (Eq, Show)
 
 emptyAutomaton :: Automaton
 emptyAutomaton = Automaton emptyState "" emptySymbol ""
 
-data Action = None--Left | Right | None | Write Symbol
+data Action = None | Left
 
-data Transition = Transition { acceptState :: State
-                             , acceptSymbol :: Symbol
-                             , action :: Action
+type Accept = (State, Symbol)
+
+data Transition = Transition { accept    :: Accept
+                             , action    :: Action
                              , nextState :: State
                              }
 
@@ -40,7 +44,27 @@ data Transition = Transition { acceptState :: State
 advance :: Automaton -> [Transition] -> Maybe Automaton
 advance _ [] = Nothing
 advance automaton transitions =
-  if state automaton == acceptState transition
-    then Just automaton { state = nextState transition }
+  if isAccepting (accept transition) (state automaton) (headSymbol automaton)
+    then Just (rollTape automaton (action transition)) { state = nextState transition }
   else Nothing
     where transition = head transitions
+
+isAccepting :: Accept -> State -> Symbol -> Bool
+isAccepting (acceptState, acceptSymbol) state symbol =
+  isAcceptingState acceptState state && isAcceptingSymbol acceptSymbol symbol
+
+isAcceptingState accept state =
+  accept == state
+
+isAcceptingSymbol accept symbol =
+  accept == anySymbol || symbol == accept
+
+rollTape :: Automaton -> Action -> Automaton
+rollTape automaton Left =
+  automaton { tapeBefore = if null before then "" else init before
+            , headSymbol = if null before then ' ' else last before
+            , tapeAfter = current : after
+            }
+  where Automaton _ before current after = automaton
+
+rollTape automaton _ = automaton

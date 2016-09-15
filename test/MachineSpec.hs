@@ -1,7 +1,8 @@
 module MachineSpec (spec) where
 
-import Test.Hspec
-import Machine
+import           Machine
+import           Prelude    hiding (Left)
+import           Test.Hspec
 
 {-# ANN module "HLint: ignore Redundant do" #-}
 
@@ -16,11 +17,24 @@ spec = do
       it "should halt" $ do
         let automaton = Automaton { state = "A"
                                   , tapeBefore = ""
-                                  , headSymbol = ' '
+                                  , headSymbol = 'X'
                                   , tapeAfter = ""
                                   }
-        let transition = Transition { acceptState = "B"
-                                    , acceptSymbol = emptySymbol
+        let transition = Transition { accept = ("B", 'X')
+                                    , action = None
+                                    , nextState = "A"
+                                    }
+
+        advance automaton [transition] `shouldBe` Nothing
+
+    context "with no accepting symbol" $ do
+      it "should halt" $ do
+        let automaton = Automaton { state = "A"
+                                  , tapeBefore = ""
+                                  , headSymbol = 'X'
+                                  , tapeAfter = ""
+                                  }
+        let transition = Transition { accept = ("A", 'Y')
                                     , action = None
                                     , nextState = "A"
                                     }
@@ -34,8 +48,7 @@ spec = do
                                    , headSymbol = 'A'
                                    , tapeAfter = ""
                                    }
-        let transition = Transition { acceptState = "State0"
-                                    , acceptSymbol = 'A'
+        let transition = Transition { accept = ("State0", 'A')
                                     , action = None
                                     , nextState = "State1"
                                     }
@@ -43,3 +56,22 @@ spec = do
 
         advance automaton0 [transition] `shouldBe` Just automaton1
         advance automaton1 [transition] `shouldBe` Nothing
+
+    it "should be able to move head left indefinitely" $ do
+      let automaton0 = Automaton { state = "LoopState"
+                                 , tapeBefore = "AB"
+                                 , headSymbol = 'C'
+                                 , tapeAfter = "DE"
+                                 }
+      let automaton1 = automaton0 { tapeBefore = "A", headSymbol = 'B', tapeAfter = "CDE"}
+      let automaton2 = automaton0 { tapeBefore = "", headSymbol = 'A', tapeAfter = "BCDE"}
+      let automaton3 = automaton0 { tapeBefore = "", headSymbol = ' ', tapeAfter = "ABCDE"}
+
+      let loop = Transition { accept = ("LoopState", '*')
+                            , action = Left
+                            , nextState = "LoopState"
+                            }
+
+      advance automaton0 [loop] `shouldBe` Just automaton1
+      advance automaton1 [loop] `shouldBe` Just automaton2
+      advance automaton2 [loop] `shouldBe` Just automaton3
