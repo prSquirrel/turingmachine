@@ -1,5 +1,13 @@
 module Machine where
 
+import Prelude hiding (lookup)
+import Data.Map as Map hiding (null)
+--import qualified Data.Map.Strict as Map
+
+-- a = Map.fromList [(1, 10), (2, 20)]
+-- b = 1 `lookup` a
+-- c = lookup 1 a
+
 type State = String
 
 emptyState :: State
@@ -27,5 +35,11 @@ data Transition = Transition { acceptState :: State
                              , nextState :: State
                              }
 
+--buildAcceptanceMap :: [Transition] -> Map (State, Symbol)
+
 advance :: Automaton -> [Transition] -> Maybe Automaton
-advance automaton transitionTable = Nothing
+advance automaton transitions =
+  if null transitions || state automaton /= acceptState transition
+    then Nothing
+  else Just automaton { state = nextState transition }
+    where transition = head transitions
