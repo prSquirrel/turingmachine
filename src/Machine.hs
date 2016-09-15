@@ -38,8 +38,9 @@ data Transition = Transition { acceptState :: State
 --buildAcceptanceMap :: [Transition] -> Map (State, Symbol)
 
 advance :: Automaton -> [Transition] -> Maybe Automaton
+advance _ [] = Nothing
 advance automaton transitions =
-  if null transitions || state automaton /= acceptState transition
-    then Nothing
-  else Just automaton { state = nextState transition }
+  if state automaton == acceptState transition
+    then Just automaton { state = nextState transition }
+  else Nothing
     where transition = head transitions
