@@ -27,7 +27,7 @@ data Automaton = Automaton { state :: State
 emptyAutomaton :: Automaton
 emptyAutomaton = Automaton emptyState "" emptySymbol ""
 
-data Action = Left | Right | None | Write Symbol
+data Action = None--Left | Right | None | Write Symbol
 
 data Transition = Transition { acceptState :: State
                              , acceptSymbol :: Symbol
