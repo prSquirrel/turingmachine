@@ -57,6 +57,28 @@ spec = do
         advance automaton0 [transition] `shouldBe` Just automaton1
         advance automaton1 [transition] `shouldBe` Nothing
 
+    context "with two different transitions" $ do
+      it "should only pick matching transition" $ do
+        let automaton0 = Automaton { state = "State0"
+                                   , tapeBefore = ""
+                                   , headSymbol = 'A'
+                                   , tapeAfter = ""
+                                   }
+        let automaton1 = automaton0 { state = "State1" }
+        let automaton2 = automaton0 { state = "State2" }
+
+        let transition0 = Transition { accept = ("State0", 'A')
+                                     , action = None
+                                     , nextState = "State1"
+                                     }
+        let badTransition = transition0 { accept = ("State1", 'B'), nextState = "State3"}
+        let transition1 = transition0 { accept = ("State1", 'A'), nextState = "State2"}
+        let transitions = [badTransition, transition0, transition1]
+
+        advance automaton0 transitions `shouldBe` Just automaton1
+        advance automaton1 transitions `shouldBe` Just automaton2
+        advance automaton2 transitions `shouldBe` Nothing
+
     it "should be able to move head left indefinitely" $ do
       let automaton0 = Automaton { state = "LoopState"
                                  , tapeBefore = "AB"

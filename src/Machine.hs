@@ -1,12 +1,9 @@
 module Machine where
 
-import           Data.Map as Map hiding (null)
-import           Prelude  hiding (Left, lookup)
---import qualified Data.Map.Strict as Map
+import           Data.Generics.Aliases (orElse)
+import           Data.Map.Strict       as Map hiding (map, null)
+import           Prelude               hiding (Left, lookup)
 
--- a = Map.fromList [(1, 10), (2, 20)]
--- b = 1 `lookup` a
--- c = lookup 1 a
 
 type State = String
 
@@ -21,6 +18,7 @@ anySymbol = '*'
 emptySymbol :: Symbol
 emptySymbol = ' '
 
+
 data Automaton = Automaton { state      :: State
                            , tapeBefore :: [Symbol]
                            , headSymbol :: Symbol
@@ -30,34 +28,33 @@ data Automaton = Automaton { state      :: State
 emptyAutomaton :: Automaton
 emptyAutomaton = Automaton emptyState "" emptySymbol ""
 
+
 data Action = None | Left
 
-type Accept = (State, Symbol)
 
+type Accept = (State, Symbol)
 data Transition = Transition { accept    :: Accept
                              , action    :: Action
                              , nextState :: State
                              }
 
---buildAcceptanceMap :: [Transition] -> Map (State, Symbol)
 
 advance :: Automaton -> [Transition] -> Maybe Automaton
 advance _ [] = Nothing
 advance automaton transitions =
-  if isAccepting (accept transition) (state automaton) (headSymbol automaton)
-    then Just (rollTape automaton (action transition)) { state = nextState transition }
-  else Nothing
-    where transition = head transitions
+  let
+    rules = buildAcceptanceMap transitions
+    findForSymbol s = lookup (state automaton, s) rules
+    transition =
+      findForSymbol (headSymbol automaton) `orElse` findForSymbol anySymbol
+  in fmap (\t -> (rollTape automaton (action t)) { state = nextState t }) transition
 
-isAccepting :: Accept -> State -> Symbol -> Bool
-isAccepting (acceptState, acceptSymbol) state symbol =
-  isAcceptingState acceptState state && isAcceptingSymbol acceptSymbol symbol
 
-isAcceptingState accept state =
-  accept == state
+buildAcceptanceMap :: [Transition] -> Map Accept Transition
+buildAcceptanceMap transitions =
+  Map.fromList tuples
+    where tuples = map accept transitions `zip` transitions
 
-isAcceptingSymbol accept symbol =
-  accept == anySymbol || symbol == accept
 
 rollTape :: Automaton -> Action -> Automaton
 rollTape automaton Left =
@@ -65,6 +62,6 @@ rollTape automaton Left =
             , headSymbol = if null before then ' ' else last before
             , tapeAfter = current : after
             }
-  where Automaton _ before current after = automaton
+    where Automaton _ before current after = automaton
 
 rollTape automaton _ = automaton
