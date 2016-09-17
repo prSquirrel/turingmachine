@@ -6,7 +6,7 @@ import           Test.Hspec
 
 {-# ANN module "HLint: ignore Redundant do" #-}
 
-
+--TODO: add Tape datatype?
 automaton0 :: Automaton
 automaton0 = Automaton { state = "State0"
                        , tapeBefore = "AB"
@@ -20,7 +20,7 @@ withTape before current after a =
 
 spec :: Spec
 spec = do
-  describe "Automaton" $ do
+  describe "Turing machine" $ do
     context "with no transitions" $ do
       it "halts" $ do
         advance automaton0 [] `shouldBe` Nothing
@@ -42,6 +42,8 @@ spec = do
                                     }
 
         advance automaton0 [transition] `shouldBe` Nothing
+
+--TODO: with more than one matching transition for current state/symbol halts
 
     context "with exactly one matching transition" $ do
       it "advances once then halts" $ do
