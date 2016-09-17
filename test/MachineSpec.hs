@@ -6,6 +6,14 @@ import           Test.Hspec
 
 {-# ANN module "HLint: ignore Redundant do" #-}
 
+
+automaton0 :: Automaton
+automaton0 = Automaton { state = "State0"
+                       , tapeBefore = "AB"
+                       , headSymbol = 'C'
+                       , tapeAfter = "DE"
+                       }
+
 spec :: Spec
 spec = do
   describe "Automaton" $ do
@@ -13,87 +21,60 @@ spec = do
       it "should halt" $ do
         advance emptyAutomaton [] `shouldBe` Nothing
 
-    context "with no accepting state" $ do
+    context "with no matching accepting state but matching symbol" $ do
       it "should halt" $ do
-        let automaton = Automaton { state = "A"
-                                  , tapeBefore = ""
-                                  , headSymbol = 'X'
-                                  , tapeAfter = ""
-                                  }
-        let transition = Transition { accept = ("B", 'X')
+        let transition = Transition { accept = ("State1", 'C')
                                     , action = None
-                                    , nextState = "A"
+                                    , nextState = "State0"
                                     }
 
-        advance automaton [transition] `shouldBe` Nothing
+        advance automaton0 [transition] `shouldBe` Nothing
 
-    context "with no accepting symbol" $ do
+    context "with no matching accepting symbol but matching state" $ do
       it "should halt" $ do
-        let automaton = Automaton { state = "A"
-                                  , tapeBefore = ""
-                                  , headSymbol = 'X'
-                                  , tapeAfter = ""
-                                  }
-        let transition = Transition { accept = ("A", 'Y')
+        let transition = Transition { accept = ("State0", 'X')
                                     , action = None
-                                    , nextState = "A"
+                                    , nextState = "State0"
                                     }
 
-        advance automaton [transition] `shouldBe` Nothing
+        advance automaton0 [transition] `shouldBe` Nothing
 
     context "with exactly one matching transition" $ do
       it "should advance once then halt" $ do
-        let automaton0 = Automaton { state = "State0"
-                                   , tapeBefore = ""
-                                   , headSymbol = 'A'
-                                   , tapeAfter = ""
-                                   }
-        let transition = Transition { accept = ("State0", 'A')
+        let transition = Transition { accept = ("State0", 'C')
                                     , action = None
                                     , nextState = "State1"
                                     }
-        let automaton1 = automaton0 { state = "State1" }
 
+        let automaton1 = automaton0 { state = "State1" }
         advance automaton0 [transition] `shouldBe` Just automaton1
         advance automaton1 [transition] `shouldBe` Nothing
 
     context "with two different transitions" $ do
       it "should only pick matching transition" $ do
-        let automaton0 = Automaton { state = "State0"
-                                   , tapeBefore = ""
-                                   , headSymbol = 'A'
-                                   , tapeAfter = ""
-                                   }
-        let automaton1 = automaton0 { state = "State1" }
-        let automaton2 = automaton0 { state = "State2" }
-
-        let transition0 = Transition { accept = ("State0", 'A')
+        let transition0 = Transition { accept = ("State0", 'C')
                                      , action = None
                                      , nextState = "State1"
                                      }
-        let badTransition = transition0 { accept = ("State1", 'B'), nextState = "State3"}
-        let transition1 = transition0 { accept = ("State1", 'A'), nextState = "State2"}
-        let transitions = [badTransition, transition0, transition1]
+        let transition1 = transition0 { accept = ("State1", 'C'), nextState = "State2"}
+        let badTransition = transition0 { accept = ("State1", 'X'), nextState = "State3"}
+        let transitions = [transition0, transition1, badTransition]
 
+        let automaton1 = automaton0 { state = "State1" }
         advance automaton0 transitions `shouldBe` Just automaton1
+        let automaton2 = automaton1 { state = "State2" }
         advance automaton1 transitions `shouldBe` Just automaton2
         advance automaton2 transitions `shouldBe` Nothing
 
     it "should be able to move head left indefinitely" $ do
-      let automaton0 = Automaton { state = "LoopState"
-                                 , tapeBefore = "AB"
-                                 , headSymbol = 'C'
-                                 , tapeAfter = "DE"
-                                 }
-      let automaton1 = automaton0 { tapeBefore = "A", headSymbol = 'B', tapeAfter = "CDE"}
-      let automaton2 = automaton0 { tapeBefore = "", headSymbol = 'A', tapeAfter = "BCDE"}
-      let automaton3 = automaton0 { tapeBefore = "", headSymbol = ' ', tapeAfter = "ABCDE"}
-
-      let loop = Transition { accept = ("LoopState", '*')
+      let loop = Transition { accept = ("State0", '*')
                             , action = Left
-                            , nextState = "LoopState"
+                            , nextState = "State0"
                             }
 
+      let automaton1 = automaton0 { tapeBefore = "A", headSymbol = 'B', tapeAfter = "CDE"}
       advance automaton0 [loop] `shouldBe` Just automaton1
+      let automaton2 = automaton1 { tapeBefore = "", headSymbol = 'A', tapeAfter = "BCDE"}
       advance automaton1 [loop] `shouldBe` Just automaton2
+      let automaton3 = automaton2 { tapeBefore = "", headSymbol = ' ', tapeAfter = "ABCDE"}
       advance automaton2 [loop] `shouldBe` Just automaton3
