@@ -18,11 +18,11 @@ spec :: Spec
 spec = do
   describe "Automaton" $ do
     context "with no transitions" $ do
-      it "should halt" $ do
+      it "halts" $ do
         advance automaton0 [] `shouldBe` Nothing
 
-    context "with no matching accepting state but matching symbol" $ do
-      it "should halt" $ do
+    context "with no matching accepting state AND matching symbol" $ do
+      it "halts" $ do
         let transition = Transition { accept = ("State1", 'C')
                                     , action = None
                                     , nextState = "State0"
@@ -30,8 +30,8 @@ spec = do
 
         advance automaton0 [transition] `shouldBe` Nothing
 
-    context "with no matching accepting symbol but matching state" $ do
-      it "should halt" $ do
+    context "with no matching accepting symbol AND matching state" $ do
+      it "halts" $ do
         let transition = Transition { accept = ("State0", 'X')
                                     , action = None
                                     , nextState = "State0"
@@ -40,7 +40,7 @@ spec = do
         advance automaton0 [transition] `shouldBe` Nothing
 
     context "with exactly one matching transition" $ do
-      it "should advance once then halt" $ do
+      it "advances once then halts" $ do
         let transition = Transition { accept = ("State0", 'C')
                                     , action = None
                                     , nextState = "State1"
@@ -50,8 +50,8 @@ spec = do
         advance automaton0 [transition] `shouldBe` Just automaton1
         advance automaton1 [transition] `shouldBe` Nothing
 
-    context "with two different transitions" $ do
-      it "should only pick matching transition" $ do
+    context "with different matching transitions" $ do
+      it "picks matching transition for each step" $ do
         let transition0 = Transition { accept = ("State0", 'C')
                                      , action = None
                                      , nextState = "State1"
@@ -66,8 +66,8 @@ spec = do
         advance automaton1 transitions `shouldBe` Just automaton2
         advance automaton2 transitions `shouldBe` Nothing
 
-    context "should be able to indefinitely" $ do
-      it "move head left" $ do
+    context "with infinite looping transition in one direction" $ do
+      it "moves head position left" $ do
         let loop = Transition { accept = ("State0", '*')
                               , action = Left
                               , nextState = "State0"
@@ -79,7 +79,8 @@ spec = do
         advance automaton1 [loop] `shouldBe` Just automaton2
         let automaton3 = automaton2 { tapeBefore = "", headSymbol = ' ', tapeAfter = "ABCDE"}
         advance automaton2 [loop] `shouldBe` Just automaton3
-      it "move head right" $ do
+
+      it "moves head position right" $ do
         let loop = Transition { accept = ("State0", '*')
                               , action = Right
                               , nextState = "State0"
