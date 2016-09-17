@@ -2,7 +2,7 @@ module Machine where
 
 import           Data.Generics.Aliases (orElse)
 import           Data.Map.Strict       as Map hiding (map, null)
-import           Prelude               hiding (Left, lookup)
+import           Prelude               hiding (Left, Right, lookup)
 
 
 type State = String
@@ -31,7 +31,7 @@ emptyAutomaton :: Automaton
 emptyAutomaton = Automaton emptyState emptyTape emptySymbol emptyTape
 
 
-data Action = None | Left
+data Action = None | Left | Right
 
 
 type Accept = (State, Symbol)
@@ -59,11 +59,17 @@ buildAcceptanceMap transitions =
 
 
 rollTape :: Automaton -> Action -> Automaton
-rollTape automaton Left =
-  automaton { tapeBefore = if null before then "" else init before
-            , headSymbol = if null before then ' ' else last before
-            , tapeAfter = current : after
-            }
-    where Automaton _ before current after = automaton
-
-rollTape automaton _ = automaton
+rollTape automaton action =
+  let Automaton _ before current after = automaton
+  in case action of
+    None -> automaton
+    Left ->
+      automaton { tapeBefore = if null before then emptyTape else init before
+                , headSymbol = if null before then emptySymbol else last before
+                , tapeAfter = current : after
+                }
+    Right ->
+      automaton { tapeBefore = before ++ [current]
+                , headSymbol = if null after then emptySymbol else head after
+                , tapeAfter = if null after then emptyTape else tail after
+                }

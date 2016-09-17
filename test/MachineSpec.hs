@@ -1,7 +1,7 @@
 module MachineSpec (spec) where
 
 import           Machine
-import           Prelude    hiding (Left)
+import           Prelude    hiding (Left, Right)
 import           Test.Hspec
 
 {-# ANN module "HLint: ignore Redundant do" #-}
@@ -66,15 +66,28 @@ spec = do
         advance automaton1 transitions `shouldBe` Just automaton2
         advance automaton2 transitions `shouldBe` Nothing
 
-    it "should be able to move head left indefinitely" $ do
-      let loop = Transition { accept = ("State0", '*')
-                            , action = Left
-                            , nextState = "State0"
-                            }
+    context "should be able to indefinitely" $ do
+      it "move head left" $ do
+        let loop = Transition { accept = ("State0", '*')
+                              , action = Left
+                              , nextState = "State0"
+                              }
 
-      let automaton1 = automaton0 { tapeBefore = "A", headSymbol = 'B', tapeAfter = "CDE"}
-      advance automaton0 [loop] `shouldBe` Just automaton1
-      let automaton2 = automaton1 { tapeBefore = "", headSymbol = 'A', tapeAfter = "BCDE"}
-      advance automaton1 [loop] `shouldBe` Just automaton2
-      let automaton3 = automaton2 { tapeBefore = "", headSymbol = ' ', tapeAfter = "ABCDE"}
-      advance automaton2 [loop] `shouldBe` Just automaton3
+        let automaton1 = automaton0 { tapeBefore = "A", headSymbol = 'B', tapeAfter = "CDE"}
+        advance automaton0 [loop] `shouldBe` Just automaton1
+        let automaton2 = automaton1 { tapeBefore = "", headSymbol = 'A', tapeAfter = "BCDE"}
+        advance automaton1 [loop] `shouldBe` Just automaton2
+        let automaton3 = automaton2 { tapeBefore = "", headSymbol = ' ', tapeAfter = "ABCDE"}
+        advance automaton2 [loop] `shouldBe` Just automaton3
+      it "move head right" $ do
+        let loop = Transition { accept = ("State0", '*')
+                              , action = Right
+                              , nextState = "State0"
+                              }
+
+        let automaton1 = automaton0 { tapeBefore = "ABC", headSymbol = 'D', tapeAfter = "E"}
+        advance automaton0 [loop] `shouldBe` Just automaton1
+        let automaton2 = automaton1 { tapeBefore = "ABCD", headSymbol = 'E', tapeAfter = ""}
+        advance automaton1 [loop] `shouldBe` Just automaton2
+        let automaton3 = automaton2 { tapeBefore = "ABCDE", headSymbol = ' ', tapeAfter = ""}
+        advance automaton2 [loop] `shouldBe` Just automaton3
