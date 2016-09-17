@@ -19,7 +19,7 @@ spec = do
   describe "Automaton" $ do
     context "with no transitions" $ do
       it "should halt" $ do
-        advance emptyAutomaton [] `shouldBe` Nothing
+        advance automaton0 [] `shouldBe` Nothing
 
     context "with no matching accepting state but matching symbol" $ do
       it "should halt" $ do

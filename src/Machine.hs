@@ -18,6 +18,8 @@ anySymbol = '*'
 emptySymbol :: Symbol
 emptySymbol = ' '
 
+emptyTape :: [Symbol]
+emptyTape = ""
 
 data Automaton = Automaton { state      :: State
                            , tapeBefore :: [Symbol]
@@ -26,7 +28,7 @@ data Automaton = Automaton { state      :: State
                            } deriving (Eq, Show)
 
 emptyAutomaton :: Automaton
-emptyAutomaton = Automaton emptyState "" emptySymbol ""
+emptyAutomaton = Automaton emptyState emptyTape emptySymbol emptyTape
 
 
 data Action = None | Left
