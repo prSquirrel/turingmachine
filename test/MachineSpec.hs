@@ -14,6 +14,10 @@ automaton0 = Automaton { state = "State0"
                        , tapeAfter = "DE"
                        }
 
+withTape :: [Symbol] -> Symbol -> [Symbol] -> Automaton -> Automaton
+withTape before current after a =
+  a { tapeBefore = before, headSymbol = current, tapeAfter = after }
+
 spec :: Spec
 spec = do
   describe "Automaton" $ do
@@ -69,26 +73,33 @@ spec = do
     context "with infinite looping transition in one direction" $ do
       it "moves head position left" $ do
         let loop = Transition { accept = ("State0", '*')
-                              , action = Left
+                              , action = Move Left
                               , nextState = "State0"
                               }
 
-        let automaton1 = automaton0 { tapeBefore = "A", headSymbol = 'B', tapeAfter = "CDE"}
+        let automaton1 = withTape "A" 'B' "CDE" automaton0
         advance automaton0 [loop] `shouldBe` Just automaton1
-        let automaton2 = automaton1 { tapeBefore = "", headSymbol = 'A', tapeAfter = "BCDE"}
+        let automaton2 = withTape "" 'A' "BCDE" automaton1
         advance automaton1 [loop] `shouldBe` Just automaton2
-        let automaton3 = automaton2 { tapeBefore = "", headSymbol = ' ', tapeAfter = "ABCDE"}
+        let automaton3 = withTape "" ' ' "ABCDE" automaton2
         advance automaton2 [loop] `shouldBe` Just automaton3
 
       it "moves head position right" $ do
         let loop = Transition { accept = ("State0", '*')
-                              , action = Right
+                              , action = Move Right
                               , nextState = "State0"
                               }
 
-        let automaton1 = automaton0 { tapeBefore = "ABC", headSymbol = 'D', tapeAfter = "E"}
+        let automaton1 = withTape "ABC" 'D' "E" automaton0
         advance automaton0 [loop] `shouldBe` Just automaton1
-        let automaton2 = automaton1 { tapeBefore = "ABCD", headSymbol = 'E', tapeAfter = ""}
+        let automaton2 = withTape "ABCD" 'E' "" automaton1
         advance automaton1 [loop] `shouldBe` Just automaton2
-        let automaton3 = automaton2 { tapeBefore = "ABCDE", headSymbol = ' ', tapeAfter = ""}
+        let automaton3 = withTape "ABCDE" ' ' "" automaton2
         advance automaton2 [loop] `shouldBe` Just automaton3
+
+    it "writes symbol to the current position" $ do
+      let write = Transition { accept = ("State0", 'C')
+                             , action = Write 'X'
+                             , nextState = "State1"
+                             }
+      fmap headSymbol (advance automaton0 [write]) `shouldBe` Just 'X'

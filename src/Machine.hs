@@ -30,11 +30,12 @@ data Automaton = Automaton { state      :: State
 emptyAutomaton :: Automaton
 emptyAutomaton = Automaton emptyState emptyTape emptySymbol emptyTape
 
+data Direction = Left | Right
 
-data Action = None | Left | Right
-
+data Action = None | Move Direction | Write Symbol
 
 type Accept = (State, Symbol)
+
 data Transition = Transition { accept    :: Accept
                              , action    :: Action
                              , nextState :: State
@@ -63,13 +64,15 @@ rollTape automaton action =
   let Automaton _ before current after = automaton
   in case action of
     None -> automaton
-    Left ->
-      automaton { tapeBefore = initDef emptyTape before
-                , headSymbol = lastDef emptySymbol before
-                , tapeAfter = current : after
-                }
-    Right ->
-      automaton { tapeBefore = before ++ [current]
-                , headSymbol = headDef emptySymbol after
-                , tapeAfter = tailDef emptyTape after
-                }
+    Write s -> automaton { headSymbol = s }
+    Move d -> case d of
+      Left ->
+        automaton { tapeBefore = initDef emptyTape before
+                  , headSymbol = lastDef emptySymbol before
+                  , tapeAfter = current : after
+                  }
+      Right ->
+        automaton { tapeBefore = before ++ [current]
+                  , headSymbol = headDef emptySymbol after
+                  , tapeAfter = tailDef emptyTape after
+                  }
