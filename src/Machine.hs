@@ -3,7 +3,7 @@ module Machine where
 import           Data.Generics.Aliases (orElse)
 import           Data.Map.Strict       as Map hiding (map, null)
 import           Prelude               hiding (Left, Right, lookup)
-
+import           Safe                  (headDef, initDef, lastDef, tailDef)
 
 type State = String
 
@@ -64,12 +64,12 @@ rollTape automaton action =
   in case action of
     None -> automaton
     Left ->
-      automaton { tapeBefore = if null before then emptyTape else init before
-                , headSymbol = if null before then emptySymbol else last before
+      automaton { tapeBefore = initDef emptyTape before
+                , headSymbol = lastDef emptySymbol before
                 , tapeAfter = current : after
                 }
     Right ->
       automaton { tapeBefore = before ++ [current]
-                , headSymbol = if null after then emptySymbol else head after
-                , tapeAfter = if null after then emptyTape else tail after
+                , headSymbol = headDef emptySymbol after
+                , tapeAfter = tailDef emptyTape after
                 }
