@@ -7,7 +7,7 @@ import           Data.ByteString (ByteString)
 import           Data.Yaml       (FromJSON (..), (.:))
 import qualified Data.Yaml       as Yaml
 
-
+--TODO: map config directly, without using intermediate types
 readConfig :: ByteString -> Either String MachineConfig
 readConfig = Yaml.decodeEither
 

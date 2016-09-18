@@ -17,7 +17,8 @@ library
     exposed-modules:
         Machine,
         ConfigParser,
-        TapeParser
+        TapeParser,
+        ConfigMapper
     build-depends:
         base >=4.7 && <5,
         containers -any,
