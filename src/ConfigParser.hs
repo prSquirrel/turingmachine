@@ -12,10 +12,9 @@ import           Text.Parsec
 import           Text.Parsec.String
 
 
-parseTape :: String -> ([Symbol], Symbol, [Symbol])
-parseTape str =
-  tape
-    where tape = case parse tapeParser "tape parser" str of Right a -> a
+parseTape :: String -> Either ParseError ([Symbol], Symbol, [Symbol])
+parseTape =
+  parse tapeParser "tape parser"
 
 tapeParser :: Parser ([Symbol], Symbol, [Symbol])
 tapeParser = do
