@@ -5,9 +5,16 @@ import           Prelude    hiding (Left, Right)
 import           Test.Hspec
 
 
+metaSettings :: Meta
+metaSettings = Meta { anySymbol = '*'
+                    , emptySymbol = ' '
+                    , emptyTape = ""
+                    }
+
 --TODO: add Tape datatype?
 automaton0 :: Automaton
-automaton0 = Automaton { state = "State0"
+automaton0 = Automaton { meta = metaSettings
+                       , state = "State0"
                        , tapeBefore = "AB"
                        , headSymbol = 'C'
                        , tapeAfter = "DE"
