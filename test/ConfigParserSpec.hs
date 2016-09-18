@@ -16,7 +16,6 @@ spec =
     it "parses from YAML" $ do
       let str = [r|
       meta:
-        emptyState: empty state
         anySymbol: _
         emptySymbol: e
         emptyTape: ""
@@ -27,12 +26,11 @@ spec =
       |]
 
       readConfig str `shouldBe` Right
-        MachineConfig { meta = MetaConfig { emptyState = "empty state"
-                                          , anySymbol = '_'
+        MachineConfig { meta = MetaConfig { anySymbol = '_'
                                           , emptySymbol = 'e'
                                           , emptyTape = ""
                                           }
-                      , machine = StartConfig { state = "State0"
-                                              , tape = "A[B]C"
-                                              }
+                      , start = StartConfig { state = "State0"
+                                            , tape = "A[B]C"
+                                            }
                       }
