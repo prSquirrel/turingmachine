@@ -16,7 +16,8 @@ source-repository head
 library
     exposed-modules:
         Machine,
-        ConfigParser
+        ConfigParser,
+        TapeParser
     build-depends:
         base >=4.7 && <5,
         containers -any,

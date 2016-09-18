@@ -3,25 +3,9 @@
 
 module ConfigParser where
 
-import           Control.Applicative ((*>), (<$>), (<*), (<*>))
-import           Data.ByteString     (ByteString)
-import           Data.Yaml           (FromJSON (..), (.:))
-import qualified Data.Yaml           as Yaml
-import           Machine             (Symbol)
-import           Text.Parsec
-import           Text.Parsec.String
-
-
-parseTape :: String -> Either ParseError ([Symbol], Symbol, [Symbol])
-parseTape =
-  parse tapeParser "tape parser"
-
-tapeParser :: Parser ([Symbol], Symbol, [Symbol])
-tapeParser = do
-  before <- many (noneOf "[")
-  current <- char '[' *> anyChar <* char ']'
-  after <- many anyChar
-  return (before, current, after)
+import           Data.ByteString (ByteString)
+import           Data.Yaml       (FromJSON (..), (.:))
+import qualified Data.Yaml       as Yaml
 
 
 readConfig :: ByteString -> Either String MachineConfig

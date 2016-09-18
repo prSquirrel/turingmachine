@@ -12,7 +12,7 @@ import           Text.RawString.QQ
 
 spec :: Spec
 spec =
-  describe "Config parser" $ do
+  describe "Config parser" $
     it "parses from YAML" $ do
       let str = [r|
       meta:
@@ -36,7 +36,3 @@ spec =
                                               , tape = "A[B]C"
                                               }
                       }
-
-    it "parses machine tape from string" $ do
-      let tape = "ABCD[E]FGHJ "
-      parseTape tape `shouldBe` Right ("ABCD", 'E', "FGHJ ")
