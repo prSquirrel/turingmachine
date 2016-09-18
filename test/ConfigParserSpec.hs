@@ -38,5 +38,5 @@ spec =
                       }
 
     it "parses machine tape from string" $ do
-      let config = "ABCD[E]FGHJ "
-      parseTape config `shouldBe` Right ("ABCD", 'E', "FGHJ ")
+      let tape = "ABCD[E]FGHJ "
+      parseTape tape `shouldBe` Right ("ABCD", 'E', "FGHJ ")
