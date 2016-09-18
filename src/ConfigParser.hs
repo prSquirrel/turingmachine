@@ -9,6 +9,16 @@ import qualified Data.Yaml       as Yaml
 import           Machine         (Meta (..))
 
 --TODO: map config directly, without using intermediate types
+
+readRules :: ByteString -> Either String Rules
+readRules = Yaml.decodeEither
+
+data Rules = Rules [String] deriving (Eq, Show)
+
+instance FromJSON Rules where
+  parseJSON (Yaml.Object o) = Rules <$>
+    o .: "rules"
+
 readConfig :: ByteString -> Either String MachineConfig
 readConfig = Yaml.decodeEither
 
