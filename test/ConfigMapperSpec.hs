@@ -1,8 +1,7 @@
 module ConfigMapperSpec (spec) where
 
 import           ConfigMapper
-import           ConfigParser (MachineConfig (..), MetaConfig (..),
-                               StartConfig (..))
+import           ConfigParser (MachineConfig (..), StartConfig (..))
 import           Data.Either
 import           Machine      (Automaton (..), Meta (..))
 import           Prelude      hiding (Right)
@@ -15,18 +14,18 @@ spec =
     context "when supplied a config" $
       it "initializes from it" $ do
         let config = MachineConfig {
-          ConfigParser.meta = MetaConfig { ConfigParser.anySymbol = '_'
-                                         , ConfigParser.emptySymbol = 'e'
-                                         , ConfigParser.emptyTape = ""
-                                         },
+          ConfigParser.meta = Meta { anySymbol = '_'
+                                   , emptySymbol = 'e'
+                                   , emptyTape = ""
+                                   },
           start = StartConfig { ConfigParser.state = "SomeState0"
                               , tape = "ABCD[E]FGH"
                               }
         }
         let automaton = Automaton {
-          Machine.meta = Meta { Machine.anySymbol = '_'
-                              , Machine.emptySymbol = 'e'
-                              , Machine.emptyTape = ""
+          Machine.meta = Meta { anySymbol = '_'
+                              , emptySymbol = 'e'
+                              , emptyTape = ""
                               },
           Machine.state = "SomeState0",
           tapeBefore = "ABCD",

@@ -6,6 +6,7 @@ module ConfigParserSpec (spec) where
 
 import           ConfigParser
 import           Data.ByteString
+import           Machine           (Meta (..))
 import           Test.Hspec
 import           Text.RawString.QQ
 
@@ -26,10 +27,10 @@ spec =
       |]
 
       readConfig str `shouldBe` Right
-        MachineConfig { meta = MetaConfig { anySymbol = '_'
-                                          , emptySymbol = 'e'
-                                          , emptyTape = ""
-                                          }
+        MachineConfig { meta = Meta { anySymbol = '_'
+                                    , emptySymbol = 'e'
+                                    , emptyTape = ""
+                                    }
                       , start = StartConfig { state = "State0"
                                             , tape = "A[B]C"
                                             }
