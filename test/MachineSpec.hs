@@ -4,7 +4,6 @@ import           Machine
 import           Prelude    hiding (Left, Right)
 import           Test.Hspec
 
-{-# ANN module "HLint: ignore Redundant do" #-}
 
 --TODO: add Tape datatype?
 automaton0 :: Automaton
@@ -19,13 +18,13 @@ withTape before current after a =
   a { tapeBefore = before, headSymbol = current, tapeAfter = after }
 
 spec :: Spec
-spec = do
+spec =
   describe "Turing machine" $ do
-    context "with no transitions" $ do
-      it "halts" $ do
+    context "with no transitions" $
+      it "halts" $
         advance automaton0 [] `shouldBe` Nothing
 
-    context "with no matching accepting state AND matching symbol" $ do
+    context "with no matching accepting state AND matching symbol" $
       it "halts" $ do
         let transition = Transition { accept = ("State1", 'C')
                                     , action = None
@@ -34,7 +33,7 @@ spec = do
 
         advance automaton0 [transition] `shouldBe` Nothing
 
-    context "with no matching accepting symbol AND matching state" $ do
+    context "with no matching accepting symbol AND matching state" $
       it "halts" $ do
         let transition = Transition { accept = ("State0", 'X')
                                     , action = None
@@ -45,7 +44,7 @@ spec = do
 
 --TODO: with more than one matching transition for current state/symbol halts
 
-    context "with exactly one matching transition" $ do
+    context "with exactly one matching transition" $
       it "advances once then halts" $ do
         let transition = Transition { accept = ("State0", 'C')
                                     , action = None
@@ -56,7 +55,7 @@ spec = do
         advance automaton0 [transition] `shouldBe` Just automaton1
         advance automaton1 [transition] `shouldBe` Nothing
 
-    context "with different matching transitions" $ do
+    context "with different matching transitions" $
       it "picks matching transition for each step" $ do
         let transition0 = Transition { accept = ("State0", 'C')
                                      , action = None
