@@ -3,7 +3,6 @@ module TapeParserSpec (spec) where
 import           TapeParser
 import           Test.Hspec
 
-
 spec :: Spec
 spec =
   describe "Tape parser" $

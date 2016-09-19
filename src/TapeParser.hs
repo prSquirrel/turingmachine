@@ -1,10 +1,9 @@
-module TapeParser where
+module TapeParser (parseTape) where
 
 import           Control.Applicative ((*>), (<*))
-import           Machine             (Symbol)
+import           Machine (Symbol)
 import           Text.Parsec
 import           Text.Parsec.String
-
 
 parseTape :: String -> Either ParseError ([Symbol], Symbol, [Symbol])
 parseTape = parse tapeParser "tape parser"
