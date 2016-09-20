@@ -23,32 +23,20 @@ spec = describe "Turing machine" $ do
 
   context "with no matching accepting state AND matching symbol" $
     it "halts" $ do
-      let transition = Transition
-            { accept = ("State1", 'C')
-            , actions = [None]
-            , nextState = "State0"
-            }
+      let transition = Transition { accept = ("State1", 'C'), actions = [], nextState = "State0" }
 
       advance meta automaton0 [transition] `shouldBe` Nothing
 
   context "with no matching accepting symbol AND matching state" $
     it "halts" $ do
-      let transition = Transition
-            { accept = ("State0", 'X')
-            , actions = [None]
-            , nextState = "State0"
-            }
+      let transition = Transition { accept = ("State0", 'X'), actions = [], nextState = "State0" }
 
       advance meta automaton0 [transition] `shouldBe` Nothing
 
   --TODO: with more than one matching transition for current state/symbol halts
   context "with exactly one matching transition" $
     it "advances once then halts" $ do
-      let transition = Transition
-            { accept = ("State0", 'C')
-            , actions = [None]
-            , nextState = "State1"
-            }
+      let transition = Transition { accept = ("State0", 'C'), actions = [], nextState = "State1" }
 
       let automaton1 = automaton0 { state = "State1" }
       advance meta automaton0 [transition] `shouldBe` Just automaton1
@@ -56,11 +44,7 @@ spec = describe "Turing machine" $ do
 
   context "with different matching transitions" $
     it "picks matching transition for each step" $ do
-      let transition0 = Transition
-            { accept = ("State0", 'C')
-            , actions = [None]
-            , nextState = "State1"
-            }
+      let transition0 = Transition { accept = ("State0", 'C'), actions = [], nextState = "State1" }
       let transition1 = transition0 { accept = ("State1", 'C'), nextState = "State2" }
       let badTransition = transition0 { accept = ("State1", 'X'), nextState = "State3" }
       let transitions = [transition0, transition1, badTransition]

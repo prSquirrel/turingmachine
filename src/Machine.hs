@@ -34,8 +34,7 @@ data Transition = Transition { accept :: Accept, actions :: [Action], nextState 
 
 type Accept = (State, Symbol)
 
-data Action = None
-            | Move Direction
+data Action = Move Direction
             | Write Symbol
   deriving (Eq, Show)
 
@@ -52,7 +51,7 @@ advance meta automaton transitions =
       findForSymbol s = lookup (state, s) rules
       matchingTransition = findForSymbol current `orElse`
                            findForSymbol wildcard
-  in fmap (apply meta automaton) matchingTransition
+  in fmap (applyTransition meta automaton) matchingTransition
 
 buildAcceptanceMap :: [Transition] -> Map Accept Transition
 buildAcceptanceMap transitions =
@@ -60,18 +59,18 @@ buildAcceptanceMap transitions =
   where
     tuples = map accept transitions `zip` transitions
 
-apply :: Meta -> Automaton -> Transition -> Automaton
-apply meta automaton (Transition _ actions nextState) =
-  (rollTape meta automaton (head actions)) { state = nextState }
+applyTransition :: Meta -> Automaton -> Transition -> Automaton
+applyTransition meta automaton (Transition _ actions nextState) =
+  (applyActions meta automaton actions) { state = nextState }
 
-rollTape :: Meta -> Automaton -> Action -> Automaton
-rollTape meta automaton action =
+applyActions :: Meta -> Automaton -> [Action] -> Automaton
+applyActions _ automaton [] = automaton
+applyActions meta automaton actions =
   let Meta anySymbol emptySymbol emptyTape =
                                               meta
       Automaton _ before current after =
                                           automaton
-  in case action of
-    None -> automaton
+  in case head actions of
     Write s -> automaton { headSymbol = s }
     Move d ->
       case d of
