@@ -3,6 +3,7 @@ module Machine (
     Automaton(..),
     Transition(..),
     Symbol,
+    State,
     advance,
     Direction(..),
     Action(..),
@@ -22,7 +23,13 @@ data Automaton =
          }
   deriving (Eq, Show)
 
-data Meta = Meta { anySymbol :: Symbol, emptySymbol :: Symbol, emptyTape :: [Symbol] }
+data Meta =
+       Meta
+         { noActionSymbol :: Symbol
+         , anySymbol :: Symbol
+         , emptySymbol :: Symbol
+         , emptyTape :: [Symbol]
+         }
   deriving (Eq, Show)
 
 type State = String
@@ -44,7 +51,7 @@ data Direction = Left
 
 advance :: Meta -> Automaton -> [Transition] -> Maybe Automaton
 advance meta automaton transitions =
-  let Meta wildcard _ _ = meta
+  let Meta _ wildcard _ _ = meta
       Automaton state _ current _ =
                                      automaton
       rules = buildAcceptanceMap transitions
@@ -65,22 +72,22 @@ applyTransition meta automaton (Transition _ actions nextState) =
 
 applyActions :: Meta -> Automaton -> [Action] -> Automaton
 applyActions _ automaton [] = automaton
-applyActions meta automaton actions =
-  let Meta anySymbol emptySymbol emptyTape =
-                                              meta
-      Automaton _ before current after =
-                                          automaton
-  in case head actions of
-    Write s -> automaton { headSymbol = s }
-    Move d ->
-      case d of
-        Left -> automaton
-          { tapeBefore = initDef emptyTape before
-          , headSymbol = lastDef emptySymbol before
-          , tapeAfter = current : after
-          }
-        Right -> automaton
-          { tapeBefore = before ++ [current]
-          , headSymbol = headDef emptySymbol after
-          , tapeAfter = tailDef emptyTape after
-          }
+applyActions m automaton (x:xs) =
+  let Meta _ anySymbol emptySymbol emptyTape = m
+      Automaton _ before current after = automaton
+      newAutomaton =
+                      case x of
+                        Write s -> automaton { headSymbol = s }
+                        Move d ->
+                                   case d of
+                                     Left -> automaton
+                                               { tapeBefore = initDef emptyTape before
+                                               , headSymbol = lastDef emptySymbol before
+                                               , tapeAfter = current : after
+                                               }
+                                     Right -> automaton
+                                                { tapeBefore = before ++ [current]
+                                                , headSymbol = headDef emptySymbol after
+                                                , tapeAfter = tailDef emptyTape after
+                                                }
+  in applyActions m newAutomaton xs

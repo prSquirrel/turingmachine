@@ -5,7 +5,7 @@ import           Prelude hiding (Left, Right)
 import           Test.Hspec
 
 meta :: Meta
-meta = Meta { anySymbol = '*', emptySymbol = ' ', emptyTape = "" }
+meta = Meta { noActionSymbol = '_', anySymbol = '*', emptySymbol = ' ', emptyTape = "" }
 
 --TODO: add Tape datatype?
 automaton0 :: Automaton
@@ -87,3 +87,12 @@ spec = describe "Turing machine" $ do
   it "writes symbol to the current position" $ do
     let write = Transition { accept = ("State0", 'C'), actions = [Write 'X'], nextState = "State1" }
     fmap headSymbol (advance meta automaton0 [write]) `shouldBe` Just 'X'
+  context "with many actions in one transition" $
+    it "executes them in order and then advances to next state" $ do
+      let manyActions = Transition
+            { accept = ("State0", 'C')
+            , actions = [Move Left, Write 'X', Move Right, Move Right, Write 'Y']
+            , nextState = "State1"
+            }
+      let automaton1 = (withTape "AXC" 'Y' "E" automaton0) { state = "State1" }
+      advance meta automaton0 [manyActions] `shouldBe` Just automaton1

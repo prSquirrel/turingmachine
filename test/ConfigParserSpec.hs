@@ -16,6 +16,7 @@ spec =
       it "parses config" $ do
         let str = [r|
         meta:
+          noActionSymbol: '*'
           anySymbol: _
           emptySymbol: e
           emptyTape: ""
@@ -32,7 +33,8 @@ spec =
         readConfig str `shouldBe` Right
                                     MachineConfig
                                       { meta = Meta
-                                        { anySymbol = '_'
+                                        { noActionSymbol = '*'
+                                        , anySymbol = '_'
                                         , emptySymbol = 'e'
                                         , emptyTape = ""
                                         }
