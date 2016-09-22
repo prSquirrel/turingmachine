@@ -42,6 +42,7 @@ ruleToTransition m (acceptState, acceptSymbol, writeSymbol, moveSymbol, nextStat
   where
     write
       | noActionSymbol m == writeSymbol = []
+      | emptySymbol m == writeSymbol = [Write ' ']
       | otherwise = [Write writeSymbol]
     move
       | noActionSymbol m == moveSymbol = []

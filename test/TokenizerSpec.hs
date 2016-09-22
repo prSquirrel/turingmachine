@@ -25,3 +25,7 @@ spec =
         it "returns transition with write action" $
           tokenizeRules meta0 ["S0 C X @ S1"] `shouldBe` Either.Right
                                                            [Transition ("S0", 'C') [Write 'X'] "S1"]
+      context "with write action equal to emptySymbol" $
+        it "writes space" $
+          tokenizeRules meta0 ["S0 C e @ S1"] `shouldBe` Either.Right
+                                                           [Transition ("S0", 'C') [Write ' '] "S1"]
