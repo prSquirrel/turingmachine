@@ -29,3 +29,7 @@ spec =
         it "writes space" $
           tokenizeRules meta0 ["S0 C e @ S1"] `shouldBe` Either.Right
                                                            [Transition ("S0", 'C') [Write ' '] "S1"]
+      context "given accept state equal to emptySymbol" $
+        it "interprets it as space" $
+          tokenizeRules meta0 ["S0 e @ @ S1"] `shouldBe` Either.Right
+                                                           [Transition ("S0", ' ') [] "S1"]

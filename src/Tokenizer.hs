@@ -38,7 +38,7 @@ word = many1 (noneOf " ")
 
 ruleToTransition :: Meta -> (State, Symbol, Symbol, Symbol, State) -> Transition
 ruleToTransition m (acceptState, acceptSymbol, writeSymbol, moveSymbol, nextState) =
-  Transition (acceptState, acceptSymbol) (write ++ move) nextState
+  Transition (acceptState, checkForSpace acceptSymbol) (write ++ move) nextState
   where
     write
       | noActionSymbol m == writeSymbol = []
@@ -49,3 +49,4 @@ ruleToTransition m (acceptState, acceptSymbol, writeSymbol, moveSymbol, nextStat
       | otherwise = [Move (toDirection moveSymbol)]
     toDirection 'L' = Machine.Left
     toDirection 'R' = Machine.Right
+    checkForSpace c = if emptySymbol m == c then ' ' else c
