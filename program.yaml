@@ -1,0 +1,16 @@
+meta:
+  noActionSymbol: '*'
+  anySymbol: '*'
+  emptySymbol: '_'
+  emptyTape: ""
+
+start:
+  state: '0'
+  tape: "[0]0000000000000000000000*0000"
+
+rules:
+  - 0 0 0 R 0
+  - 0 1 1 R 0
+  - 0 * * L 1
+  - 1 0 1 R 0
+  - 1 1 0 L 1
