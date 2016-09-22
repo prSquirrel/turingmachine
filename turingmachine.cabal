@@ -18,7 +18,8 @@ library
         Machine,
         ConfigParser,
         Tokenizer,
-        ConfigMapper
+        ConfigMapper,
+        Util
     build-depends:
         base >=4.7 && <5,
         containers -any,

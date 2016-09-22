@@ -5,9 +5,7 @@ import           Data.Either
 import           Machine
 import           Tokenizer
 import           Text.Parsec
-
-uncurry3 :: (a -> b -> c -> d) -> (a, b, c) -> d
-uncurry3 f (a, b, c) = f a b c
+import           Util (uncurry3)
 
 fromConfig :: MachineConfig -> Either ParseError (Meta, Automaton, [Transition])
 fromConfig config =
