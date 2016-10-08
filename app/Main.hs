@@ -2,59 +2,64 @@
 
 module Main where
 
-import           Machine (Meta, Automaton(..), Transition, Symbol, advance)
+import           Machine             ( Automaton(..), Meta, Symbol, Transition
+                                     , advance )
 import           ConfigParser
 import           ConfigMapper
-import           Data.ByteString as ByteString hiding (putStr)
+import qualified Data.ByteString     as BS
 import           Control.Arrow
 import           Control.Monad
 import           Data.Maybe
 import           System.Console.ANSI
-import           System.Environment (getArgs)
-import           Control.Concurrent (threadDelay)
-import           System.IO (hFlush, stdout)
-import           Util (uncurry3)
+import           System.Environment  ( getArgs )
+import           Control.Concurrent  ( threadDelay )
+import           System.IO           ( hFlush, stdout )
+import           Util                ( getOrFail, uncurry3 )
 
 main :: IO ()
 main = do
-  [fileName, iterations, delay] <- getArgs
-  configBody <- ByteString.readFile fileName
-  let startEnv = getOrFail $ getEnv configBody
-  uncurry3 runMachine startEnv (read iterations :: Int) (read delay :: Int)
+    delay : iterations : fileNames <- getArgs
+    files <- sequence $ fmap BS.readFile fileNames
+    let envs = fmap (getOrFail . getEnv) files
+    runMachines envs (read iterations :: Int) (read delay :: Int)
 
-getEnv :: ByteString -> Either String (Meta, Automaton, [Transition])
-getEnv str = readConfig str >>= mapConfig
+data Env = Env { meta        :: Meta
+               , automaton   :: Automaton
+               , transitions :: [Transition]
+               }
+
+getEnv :: BS.ByteString -> Either String Env
+getEnv str = uncurry3 Env <$> (readConfig str >>= mapConfig)
   where
+    mapConfig :: MachineConfig -> Either String (Meta, Automaton, [Transition])
     mapConfig c = left show (fromConfig c)
 
-getOrFail :: Either String a -> a
-getOrFail x =
-  case x of
-    Right a -> a
-    Left e  -> error e
+runMachines :: [Env] -> Int -> Int -> IO ()
+runMachines envs iterations delayMillis
+    | iterations > 0 = do
+          setCursorPosition 0 0
+          clearFromCursorToScreenEnd
 
-runMachine :: Meta -> Automaton -> [Transition] -> Int -> Int -> IO ()
-runMachine m a ts iterations delayMillis = runMachine' m (Just a) ts iterations
+          forM_ envs (printTape . automaton)
+          hFlush stdout
+          threadDelay (delayMillis * 1000)
+
+          runMachines (stepMachine <$> envs) (iterations - 1) delayMillis
+    | otherwise = return ()
+
+printTape :: Automaton -> IO ()
+printTape a = do
+    putStr $ tapeBefore a
+    setSGR [ SetUnderlining SingleUnderline ]
+    putChar $ headSymbol a
+    setSGR [ SetUnderlining NoUnderline ]
+    putStr $ tapeAfter a
+    putChar '\n'
+
+stepMachine :: Env -> Env
+stepMachine e@(Env m a ts) =
+    case next of
+        Just a' -> e { automaton = a' }
+        Nothing -> e
   where
-    halt = return ()
-    runMachine' _ Nothing _ _ = halt
-    runMachine' m' (Just a') ts' n'
-      | n' > 0 = do
-          printTape delayMillis a'
-          let next = advance m' a' ts'
-          runMachine' m' next ts' (n' - 1)
-      | otherwise = halt
-
-printTape :: Int -> Automaton -> IO ()
-printTape delayMillis a = do
-  setCursorColumn 0
-  clearFromCursorToLineEnd
-
-  putStr $ tapeBefore a
-  setSGR [SetUnderlining SingleUnderline]
-  putChar $ headSymbol a
-  setSGR [SetUnderlining NoUnderline]
-  putStr $ tapeAfter a
-
-  hFlush stdout
-  threadDelay (delayMillis * 1000)
+    next = advance m a ts

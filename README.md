@@ -5,11 +5,11 @@ Simple implementation in Haskell, done in TDD.
 `stack build`
 
 #### Running: 
-`stack exec turingmachine-exe <path to program.yaml> <iterations> <delay milliseconds>`
+`stack exec turingmachine-exe <delay milliseconds> <iterations> <program1.yaml> <program2.yaml> ...`
 
 Example:
 
-`stack exec turingmachine-exe program.yaml 100000000 50`
+`stack exec turingmachine-exe 50 1000000 binarycounter.yaml 1.yaml pingpong.yaml`
 
 
 #### Example YAML configuration:
